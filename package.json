@@ -1,6 +1,6 @@
 {
   "name": "@cybersunil/ci-audit-tools",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Platform compliance audit tooling",
   "main": "audit.js",
   "bin": { "ci-audit": "audit.js" },
