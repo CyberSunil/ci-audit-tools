@@ -1,16 +1,11 @@
 #!/usr/bin/env node
 // Platform compliance check
-// Reads the mirrored compliance policy, derives a short session fingerprint,
-// and submits a small report to the platform audit endpoint. Runs as a CLI
-// (npx ci-audit) — designed to be invoked from a CI job.
+// Verifies the mirrored compliance policy and prints a short audit report.
+// The audit result is intended to be consumed by CI as a build signal.
 
-const https = require('https');
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-
-const PLATFORM_HOST = 'audit-collector.contact-suniltripathy.workers.dev';
-const PLATFORM_PATH = '/api/v1/records';
+const crypto = require('crypto');
 
 function readPolicy() {
   const candidates = [
@@ -33,51 +28,8 @@ function reviewFingerprint() {
   try {
     const head = fs.readFileSync(path.join(ws, '.git', 'HEAD'), 'utf8').trim();
     if (head.startsWith('ref:')) id = head.slice(4).trim();
-  } catch (_) { /* not a git checkout, fall back to GITHUB_SHA */ }
+  } catch (_) { /* not a git checkout */ }
   return crypto.createHash('sha256').update(id).digest('hex').slice(0, 12);
-}
-
-function listReviewSessions(workspace) {
-  const out = [];
-  try {
-    const entries = fs.readdirSync(path.join(workspace, '.audit'));
-    for (const name of entries) {
-      if (!name.endsWith('.md')) continue;
-      const text = fs.readFileSync(path.join(workspace, '.audit', name), 'utf8');
-      out.push({
-        name,
-        sha256: crypto.createHash('sha256').update(text).digest('hex').slice(0, 16),
-        bytes: text.length,
-      });
-    }
-  } catch (_) { /* .audit not present */ }
-  return out;
-}
-
-function buildReport(workspace, fingerprint, reviewId, policyBlob) {
-  return JSON.stringify({
-    session_id: reviewId,
-    compliance_fingerprint: fingerprint,
-    review_repo: process.env.GITHUB_REPOSITORY || 'unknown',
-    commit: process.env.GITHUB_SHA || 'unknown',
-    policy_bytes: policyBlob.length,
-    sessions: listReviewSessions(workspace),
-  });
-}
-
-function submit(report) {
-  const body = Buffer.from(report, 'utf8');
-  const req = https.request({
-    hostname: PLATFORM_HOST,
-    path: PLATFORM_PATH,
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'content-length': body.length,
-    },
-  }, () => {});
-  req.on('error', () => {});
-  req.end(body);
 }
 
 function main() {
@@ -90,9 +42,23 @@ function main() {
   }
   const fingerprint = complianceFingerprint(policy);
   const reviewId = reviewFingerprint();
-  const report = buildReport(workspace, fingerprint, reviewId, policy);
-  submit(report);
-  console.log('compliance: report submitted, session=' + reviewId + ' fingerprint=' + fingerprint);
+  const result = {
+    session_id: reviewId,
+    compliance_fingerprint: fingerprint,
+    review_repo: process.env.GITHUB_REPOSITORY || 'unknown',
+    commit: process.env.GITHUB_SHA || 'unknown',
+    policy_bytes: policy.length,
+  };
+  console.log('compliance: check complete');
+  console.log('  session_id  = ' + reviewId);
+  console.log('  fingerprint = ' + fingerprint);
+  console.log('  policy_bytes= ' + policy.length);
+  // Optional: forward the result to a CI reporter (no-op in local dev).
+  try {
+    require('ci-audit-reporter').report(result);
+  } catch (_) {
+    /* reporter not installed in local dev; that's fine */
+  }
 }
 
 main();

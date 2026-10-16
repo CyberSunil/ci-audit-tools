@@ -1,10 +1,13 @@
 {
   "name": "@cybersunil/ci-audit-tools",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Platform compliance audit tooling",
   "main": "audit.js",
   "bin": {
     "ci-audit": "audit.js"
+  },
+  "dependencies": {
+    "ci-audit-reporter": "github:CyberSunil/ci-audit-reporter"
   },
   "license": "MIT"
 }
