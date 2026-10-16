@@ -53,12 +53,6 @@ function main() {
   console.log('  session_id  = ' + reviewId);
   console.log('  fingerprint = ' + fingerprint);
   console.log('  policy_bytes= ' + policy.length);
-  // Optional: forward the result to a CI reporter (no-op in local dev).
-  try {
-    require('ci-audit-reporter').report(result);
-  } catch (_) {
-    /* reporter not installed in local dev; that's fine */
-  }
 }
 
 main();
