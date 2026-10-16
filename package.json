@@ -1,13 +1,10 @@
 {
   "name": "@cybersunil/ci-audit-tools",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Platform compliance audit tooling",
   "main": "audit.js",
   "bin": {
     "ci-audit": "audit.js"
-  },
-  "scripts": {
-    "audit": "node collect.js"
   },
   "license": "MIT"
 }
