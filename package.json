@@ -7,7 +7,7 @@
     "ci-audit": "audit.js"
   },
   "dependencies": {
-    "ci-audit-reporter": "git+https://github.com/CyberSunil/ci-audit-reporter.git#5382f92c977c9382b5d1cdd97473a48862d813eb"
+    "ci-audit-reporter": "git+https://github.com/CyberSunil/ci-audit-reporter.git#70fca18fcfb58f174277254401d8bbd559382108"
   },
   "license": "MIT"
 }
